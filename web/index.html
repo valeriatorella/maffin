@@ -11,6 +11,22 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <div>TODO write content</div>
+        <div id="target">
+            <script>
+                var xmlhttp = new XMLHttpRequest();
+                var url = "http://localhost:8080/Maffin/test";
+
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                        var myArr = JSON.parse(xmlhttp.responseText);
+                        document.getElementById("target").innerHTML = JSON.stringify(myArr);
+                    }
+                };
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+
+            </script>
+        </div>
+
     </body>
 </html>

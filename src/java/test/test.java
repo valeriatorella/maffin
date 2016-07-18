@@ -7,6 +7,14 @@ package test;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,15 +45,14 @@ public class test extends HttpServlet {
         response.addHeader("Access-Control-Allow-Headers", "x-requested-with");
         String action = request.getParameter("action");
 
-        try (PrintWriter out = response.getWriter()) {
-
-            JSONArray ja = new JSONArray();
-            JSONObject obj = new JSONObject();
-            obj.put("campo1", "valore1");
-            obj.put("campo2", "valore2");
-            obj.put("campo3", "valore3");
-            ja.add(obj);
-            out.println(ja);
+        if (action == null) {
+            try (PrintWriter out = response.getWriter()) {
+                out.println("null parameters");
+            }
+        } else if (action.equals("test")) {
+            testMethod(request, response);
+        } else if (action.equals("update")) {
+            testMethodUpdate(request, response);
         }
     }
 
@@ -87,5 +94,46 @@ public class test extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void testMethod(HttpServletRequest request, HttpServletResponse response) {
+        try (PrintWriter out = response.getWriter()) {
+            String myDriver = "com.mysql.jdbc.Driver";
+            String myUrl = "jdbc:mysql://localhost:3306/bonita";
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, "root", "root");
+            String query = "SELECT * FROM evento";
+            java.sql.Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(query);
+            JSONArray ja = new JSONArray();
+            JSONObject obj = new JSONObject();
+            obj.put("campo1", "valore1");
+            obj.put("campo2", "valore2");
+            obj.put("campo3", "valore3");
+            ja.add(obj);
+            out.println(ja);
+        } catch (IOException ex) {
+            Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void testMethodUpdate(HttpServletRequest request, HttpServletResponse response){
+        Map<String, String[]> map = request.getParameterMap();
+        for (Map.Entry temp : map.entrySet()) {
+            System.out.println(temp.getKey() + " " + temp.getValue());
+        }
+        String hiddenPost = request.getParameter("ids");
+        System.out.println(hiddenPost);
+
+        try (PrintWriter out = response.getWriter()) {
+            out.println(hiddenPost);
+        } catch (IOException ex) {
+            Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
 
 }

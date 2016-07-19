@@ -99,9 +99,30 @@
                     }
                 });
             });
-
-
-
+            
+            $(document).on("click", "#submit", function () {
+                dip_cod_form = $("#dip_doc").val();
+                cf_doc_form = $("#cf_doc").val();
+                dip_ins_form = $("#dip_ins").val();
+                id_ins_form = $("#id_ins").val();
+                $.ajax({
+                    type: "POST",
+                    url: "Candidature",
+                    data: {action: "insCand",
+                        dip_doc: dip_cod_form,
+                        cf_doc: cf_doc_form,
+                        dip_cod: dip_ins_form,
+                        id_ins: id_ins_form
+                    },
+                    success: function () {
+                        alert("Candidatura inserita correttamente.");
+                    },
+                    error: function (xhr, status, error) {
+                        alert(error);
+                    }
+                });
+            });
+  
         </script>
         <title>Aggiungi candidatura</title>
     </head>

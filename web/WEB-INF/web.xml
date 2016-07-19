@@ -8,6 +8,10 @@
         <servlet-name>Docenti</servlet-name>
         <servlet-class>test.Docenti</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Candidature</servlet-name>
+        <servlet-class>test.Candidature</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>test</servlet-name>
         <url-pattern>/test</url-pattern>
@@ -15,6 +19,10 @@
     <servlet-mapping>
         <servlet-name>Docenti</servlet-name>
         <url-pattern>/Docenti</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Candidature</servlet-name>
+        <url-pattern>/Candidature</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

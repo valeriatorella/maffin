@@ -18,6 +18,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -44,7 +46,6 @@ public class Candidature extends HttpServlet {
             String myUrl = "jdbc:mysql://localhost:3306/maffin";
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl, "root", "");
-            Statement st = conn.createStatement();
             PrintWriter out = response.getWriter();
 
             if (action.equals("insCand")) {
@@ -56,7 +57,47 @@ public class Candidature extends HttpServlet {
                 String query = "INSERT INTO candidature (ID_INS, COD_FIS, COD_DIP_AFF, COD_DIP_CAP) VALUES " 
                                 +"('"+id_ins+"','"+cf_doc+"',"+dip_doc+","+dip_ins+")";
                 
+                Statement st = conn.createStatement();
                 boolean rs = st.execute(query);
+            }
+            
+            //elenco candidature filtrate per dipartimento capofila. ATTIVITà CONVALIDARE CANDIDATURE
+            if (action.equals("getCandByCap")) {
+                String dip_cap = (String)request.getParameter("dip_cap");
+                
+                String query;
+                query = "SELECT docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, " +
+                        "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "+
+                        "offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT " +
+                        "FROM candidature " +
+                        "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "+
+                        "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "+
+                        "WHERE candidature.STATO = 'ATTESA' "+
+                        "AND candidature.COD_DIP_CAP = "+dip_cap;
+                
+                Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery(query);
+                String temp = "";
+                JSONArray resArray = new JSONArray();
+                JSONObject result;
+                
+                while (rs.next()) {
+                    result = new JSONObject();
+                    result.put("RUOLO_DOC_COD", rs.findColumn("RUOLO_DOC_COD"));
+                    result.put("NOME", rs.findColumn("NOME"));
+                    result.put("COGNOME", rs.findColumn("COGNOME"));
+                    result.put("AREA_SETT_SSD", rs.findColumn("AREA_SETT_SSD"));
+                    result.put("PDS_DES", rs.findColumn("PDS_DES"));
+                    result.put("NOME_CDS", rs.findColumn("NOME_CDS"));
+                    result.put("TIPO_CORSO_COD", rs.findColumn("TIPO_CORSO_COD"));
+                    result.put("AF_GEN_COD", rs.findColumn("AF_GEN_COD"));
+                    result.put("DES", rs.findColumn("DES"));
+                    result.put("ORE_ATT_FRONT", rs.findColumn("ORE_ATT_FRONT"));
+                    resArray.add(result);
+                }
+                temp = "<div> '"+resArray.toString()+"' </div>";
+                out.write(temp);
+                System.out.println(resArray);
             }
             
             conn.close();

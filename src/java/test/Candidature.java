@@ -12,9 +12,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -106,16 +103,11 @@ public class Candidature extends HttpServlet {
             
             if (action.equals("convalidaCand")) {
                 String dip_cap = (String) request.getParameter("dip_cap");
-                String cand_app = (String) request.getParameter("cand_app");
-                List<String> cand_app_list = Arrays.asList(cand_app.split("-"));
+                String cand_app = (String) request.getParameter("cand_app").replaceAll("-", ",");
                 
                 String query;
-                query = "UPDATE candidature SET STATO = 'APPROVATA' WHERE ID_CAND = "+cand_app_list.get(0); 
-                
-                for(int i=1; i<cand_app_list.size(); i++){
-                    query+= "OR ID_CAND = "+cand_app_list.get(i);
-                }
-                
+                query = "UPDATE candidature SET STATO = 'APPROVATA' WHERE ID_CAND IN ("+cand_app+")"; 
+                                
                 Statement st = conn.createStatement();
                 boolean rs = st.execute(query);
                 
@@ -147,6 +139,7 @@ public class Candidature extends HttpServlet {
                
                while (rs.next()) {
                    result = new JSONObject();
+                   result.put("ID_CAND", rs.getString("ID_CAND"));
                    result.put("RUOLO_DOC_COD", rs.getString("RUOLO_DOC_COD"));
                    result.put("NOME", rs.getString("NOME"));
                    result.put("COGNOME", rs.getString("COGNOME"));
@@ -163,11 +156,26 @@ public class Candidature extends HttpServlet {
                System.out.println(resArray);
            }
            
-           /*if (action.equals("affidaIns"){
-               //String candList =; lista id candidature
+           if (action.equals("affidaIns")){
+               String cand_app = (String) request.getParameter("cand_app").replaceAll("-", ",");
+               //List<String> cand_app_list = Arrays.asList(cand_app.split(","));
+               
                String query;
-               query = ""
-           }*/
+               query = "SELECT offerta_formativa.ID_INS, candidature.ID_CAND "+
+                       "FROM offerta_formativa JOIN candidature "+
+                       "ON offerta_formativa.ID_INS = candidature.ID_INS "+
+                       "WHERE candidature.ID_CAND IN("+cand_app+")";
+               Statement st = conn.createStatement();
+               ResultSet rs = st.executeQuery(query);
+               
+               while (rs.next()){
+                    String query1;
+                    query1 = "UPDATE offerta_formativa SET ID_CAND = "+rs.getString("ID_CAND")+","+
+                    "AFFIDATO = 1 WHERE offerta_formativa = "+rs.getString("ID_INS");
+                    Statement st1 = conn.createStatement();
+                    ResultSet rs1 = st1.executeQuery(query);
+               }
+           }
             
             conn.close();
             out.close();

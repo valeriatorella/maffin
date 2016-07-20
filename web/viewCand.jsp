@@ -25,25 +25,8 @@
                 });
             });
             
-            $(document).on("change", "#dip_cap", function () {
-                dip_cap = $("#dip_cap").val();
-                $.ajax({
-                    type: "POST",
-                    url: "Insegnamenti",
-                    data: {action: "getDipList",
-                        dip_cap: dip_cap
-                    },
-                    success: function (data) {
-                        $("#dip_cap").html(data);
-                    },
-                    error: function (xhr, status, error) {
-                        alert(error);
-                    }
-                });
-            });
-            
             $(document).on("click", "#submitCand", function () {
-                dip_cap = 10079;
+                dip_cap = $("#dip_cap").val();
                 $.ajax({
                     type: "POST",
                     url: "Candidature",
@@ -51,7 +34,7 @@
                         dip_cap: dip_cap
                     },
                     success: function (data) {
-                        $("#view_cand").html(data);
+                        $("#cand").html(data);
                     },
                     error: function (xhr, status, error) {
                         alert(error);
@@ -70,6 +53,13 @@
             <br><br>
             <button id='submitCand'>Visualizza</button>
         </form>
-        <div id='view_cand'> </div>
+        <br><br>
+        <form action="">
+            <fieldset id='cand'>
+             <legend>Proposte ricevute:</legend><br>
+             
+            </fieldset>
+        </form>
+        
     </body>
 </html>

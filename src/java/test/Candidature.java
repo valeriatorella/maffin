@@ -61,12 +61,12 @@ public class Candidature extends HttpServlet {
                 boolean rs = st.execute(query);
             }
             
-            //elenco candidature filtrate per dipartimento capofila. ATTIVITà CONVALIDARE CANDIDATURE
+            //elenco candidature filtrate per dipartimento capofila.
             if (action.equals("getCandByCap")) {
                 String dip_cap = (String)request.getParameter("dip_cap");
                 
                 String query;
-                query = "SELECT docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, " +
+                query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, " +
                         "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "+
                         "offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT " +
                         "FROM candidature " +
@@ -83,22 +83,78 @@ public class Candidature extends HttpServlet {
                 
                 while (rs.next()) {
                     result = new JSONObject();
-                    result.put("RUOLO_DOC_COD", rs.findColumn("RUOLO_DOC_COD"));
-                    result.put("NOME", rs.findColumn("NOME"));
-                    result.put("COGNOME", rs.findColumn("COGNOME"));
-                    result.put("AREA_SETT_SSD", rs.findColumn("AREA_SETT_SSD"));
-                    result.put("PDS_DES", rs.findColumn("PDS_DES"));
-                    result.put("NOME_CDS", rs.findColumn("NOME_CDS"));
-                    result.put("TIPO_CORSO_COD", rs.findColumn("TIPO_CORSO_COD"));
-                    result.put("AF_GEN_COD", rs.findColumn("AF_GEN_COD"));
-                    result.put("DES", rs.findColumn("DES"));
-                    result.put("ORE_ATT_FRONT", rs.findColumn("ORE_ATT_FRONT"));
+                    temp += "<input type='checkbox' name='candidatura' value='"+rs.getString("ID_CAND")+"'/> ";
+                    result.put("ID_CAND", rs.getString("ID_CAND"));
+                    result.put("RUOLO_DOC_COD", rs.getString("RUOLO_DOC_COD"));
+                    result.put("NOME", rs.getString("NOME"));
+                    result.put("COGNOME", rs.getString("COGNOME"));
+                    result.put("AREA_SETT_SSD", rs.getString("AREA_SETT_SSD"));
+                    result.put("PDS_DES", rs.getString("PDS_DES"));
+                    result.put("NOME_CDS", rs.getString("NOME_CDS"));
+                    result.put("TIPO_CORSO_COD", rs.getString("TIPO_CORSO_COD"));
+                    result.put("AF_GEN_COD", rs.getString("AF_GEN_COD"));
+                    result.put("DES", rs.getString("DES"));
+                    result.put("ORE_ATT_FRONT", rs.getString("ORE_ATT_FRONT"));
                     resArray.add(result);
                 }
-                temp = "<div> '"+resArray.toString()+"' </div>";
                 out.write(temp);
                 System.out.println(resArray);
             }
+            
+            //elenco candidature filtrate per dipartimento afferenza.
+           if (action.equals("getCandByAff")) {
+               String dip_aff = (String)request.getParameter("dip_aff");
+               
+               String query;
+               query = "SELECT docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, " +
+                       "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "+
+                       "offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT " +
+                       "FROM candidature " +
+                       "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "+
+                       "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "+
+                       "WHERE candidature.STATO = 'ATTESA' "+
+                       "AND candidature.COD_DIP_AFF = "+dip_aff;
+               
+               Statement st = conn.createStatement();
+               ResultSet rs = st.executeQuery(query);
+               String temp = "";
+               JSONArray resArray = new JSONArray();
+               JSONObject result;
+               
+               while (rs.next()) {
+                   result = new JSONObject();
+                   result.put("RUOLO_DOC_COD", rs.getString("RUOLO_DOC_COD"));
+                   result.put("NOME", rs.getString("NOME"));
+                   result.put("COGNOME", rs.getString("COGNOME"));
+                   result.put("AREA_SETT_SSD", rs.getString("AREA_SETT_SSD"));
+                   result.put("PDS_DES", rs.getString("PDS_DES"));
+                   result.put("NOME_CDS", rs.getString("NOME_CDS"));
+                   result.put("TIPO_CORSO_COD", rs.getString("TIPO_CORSO_COD"));
+                   result.put("AF_GEN_COD", rs.getString("AF_GEN_COD"));
+                   result.put("DES", rs.getString("DES"));
+                   result.put("ORE_ATT_FRONT", rs.getString("ORE_ATT_FRONT"));
+                   resArray.add(result);
+               }
+               out.write(temp);
+               System.out.println(resArray);
+           }
+           
+//            if (action.equals("convalidaCand")) {
+//                //TODO servono id delle candidature e dip di afferenza
+//                
+//                String query;
+//                query = "UPDATE candidature SET STATO = 'APPROVATA' WHERE ID_CAND = "; /*+id_cand*/
+//                while (/*ci sono id*/){
+//                    query+= "OR ID_CAND = "/*+id_cand*/;
+//                }
+//                Statement st = conn.createStatement();
+//                boolean rs = st.execute(query);
+//                
+//                String query1;
+//                query1 = "UPDATE candidature SET STATO = 'RIFIUTATA' WHERE STATO = 'ATTESA' AND COD_DIP_AFF = "; /*cod_dip_aff*/
+//                Statement st1 = conn.createStatement();
+//                boolean rs1 = st1.execute(query1);
+//            }
             
             conn.close();
             out.close();

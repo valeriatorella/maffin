@@ -12,6 +12,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -101,18 +104,39 @@ public class Candidature extends HttpServlet {
                 System.out.println(resArray);
             }
             
+            if (action.equals("convalidaCand")) {
+                String dip_cap = (String) request.getParameter("dip_cap");
+                String cand_app = (String) request.getParameter("cand_app");
+                List<String> cand_app_list = Arrays.asList(cand_app.split("-"));
+                
+                String query;
+                query = "UPDATE candidature SET STATO = 'APPROVATA' WHERE ID_CAND = "+cand_app_list.get(0); 
+                
+                for(int i=1; i<cand_app_list.size(); i++){
+                    query+= "OR ID_CAND = "+cand_app_list.get(i);
+                }
+                
+                Statement st = conn.createStatement();
+                boolean rs = st.execute(query);
+                
+                String query1;
+                query1 = "UPDATE candidature SET STATO = 'RIFIUTATA' WHERE STATO = 'ATTESA' AND COD_DIP_CAP = "+dip_cap; 
+                Statement st1 = conn.createStatement();
+                boolean rs1 = st1.execute(query1);
+            }
+            
             //elenco candidature filtrate per dipartimento afferenza.
            if (action.equals("getCandByAff")) {
                String dip_aff = (String)request.getParameter("dip_aff");
                
                String query;
-               query = "SELECT docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, " +
+               query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, " +
                        "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "+
                        "offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT " +
                        "FROM candidature " +
                        "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "+
                        "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "+
-                       "WHERE candidature.STATO = 'ATTESA' "+
+                       "WHERE candidature.STATO = 'ACCETTATA' "+
                        "AND candidature.COD_DIP_AFF = "+dip_aff;
                
                Statement st = conn.createStatement();
@@ -139,22 +163,11 @@ public class Candidature extends HttpServlet {
                System.out.println(resArray);
            }
            
-//            if (action.equals("convalidaCand")) {
-//                //TODO servono id delle candidature e dip di afferenza
-//                
-//                String query;
-//                query = "UPDATE candidature SET STATO = 'APPROVATA' WHERE ID_CAND = "; /*+id_cand*/
-//                while (/*ci sono id*/){
-//                    query+= "OR ID_CAND = "/*+id_cand*/;
-//                }
-//                Statement st = conn.createStatement();
-//                boolean rs = st.execute(query);
-//                
-//                String query1;
-//                query1 = "UPDATE candidature SET STATO = 'RIFIUTATA' WHERE STATO = 'ATTESA' AND COD_DIP_AFF = "; /*cod_dip_aff*/
-//                Statement st1 = conn.createStatement();
-//                boolean rs1 = st1.execute(query1);
-//            }
+           /*if (action.equals("affidaIns"){
+               //String candList =; lista id candidature
+               String query;
+               query = ""
+           }*/
             
             conn.close();
             out.close();

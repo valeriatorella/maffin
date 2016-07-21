@@ -103,6 +103,7 @@
             $(document).on("click", "#submit", function () {
                 dip_cod_form = $("#dip_doc").val();
                 cf_doc_form = $("#cf_doc").val();
+                ruolo_doc_form =$("#ruolo_doc").val();
                 dip_ins_form = $("#dip_ins").val();
                 id_ins_form = $("#id_ins").val();
                 $.ajax({
@@ -111,6 +112,7 @@
                     data: {action: "insCand",
                         dip_doc: dip_cod_form,
                         cf_doc: cf_doc_form,
+                        ruolo_doc: ruolo_doc_form,
                         dip_cod: dip_ins_form,
                         id_ins: id_ins_form
                     },

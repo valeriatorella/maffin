@@ -56,11 +56,12 @@ public class Candidature extends HttpServlet {
             if (action.equals("insCand")) {
                 String dip_doc = (String) request.getParameter("dip_doc");
                 String cf_doc = (String) request.getParameter("cf_doc");
+                String ruolo_doc = (String) request.getParameter("ruolo_doc");
                 String dip_ins = (String) request.getParameter("dip_cod");
                 String id_ins = (String) request.getParameter("id_ins");
-
-                String query = "INSERT INTO candidature (ID_INS, COD_FIS, COD_DIP_AFF, COD_DIP_CAP) VALUES "
-                        + "('" + id_ins + "','" + cf_doc + "'," + dip_doc + "," + dip_ins + ")";
+                
+                String query = "INSERT INTO candidature (ID_INS, COD_FIS, RUOLO_DOC_COD, COD_DIP_AFF, COD_DIP_CAP) VALUES "
+                        + "('" + id_ins + "','" + cf_doc + "','" + ruolo_doc + "'," + dip_doc + "," + dip_ins + ")";
 
                 Statement st = conn.createStatement();
                 boolean rs = st.execute(query);
@@ -68,6 +69,7 @@ public class Candidature extends HttpServlet {
 
             //elenco candidature filtrate per dipartimento capofila.
             if (action.equals("getCandByCap")) {
+                String fase = (String) request.getParameter("fase");
                 String dip_cap = (String) request.getParameter("dip_cap");
 
                 String query;
@@ -78,7 +80,13 @@ public class Candidature extends HttpServlet {
                         + "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "
                         + "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "
                         + "WHERE candidature.STATO = 'ATTESA' "
-                        + "AND candidature.COD_DIP_CAP = " + dip_cap;
+                        + "AND candidature.COD_DIP_CAP = " + dip_cap +" ";
+                switch(fase){
+                    case "A":
+                        query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD')";
+                    case "B":
+                        query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD','RU')";
+                }
 
                 Statement st = conn.createStatement();
                 ResultSet rs = st.executeQuery(query);

@@ -47,7 +47,7 @@
     </head>
     <body>
         <h1>Visualizza candidatura</h1>
-        <form>
+        <form onsubmit="return false">
             Scegli dipartimento capofila:
             <select id='dip_cap'></select>
             <br><br>

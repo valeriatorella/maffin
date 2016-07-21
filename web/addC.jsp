@@ -119,6 +119,8 @@
                     },
                     error: function (xhr, status, error) {
                         alert(error);
+                        alert(JSON.stringify(xhr));
+                        alert(status);
                     }
                 });
             });
@@ -128,7 +130,7 @@
     </head>
     <body>
         <h1>Aggiungi candidatura</h1>
-        <form>
+        <form onsubmit="return false">
             Dipartimento afferenza
             <select id='dip_doc'></select>
             <br>

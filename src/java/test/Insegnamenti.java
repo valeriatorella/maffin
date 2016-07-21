@@ -39,6 +39,11 @@ public class Insegnamenti extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+        response.addHeader("Access-Control-Max-Age", "3600");
+        response.addHeader("Access-Control-Allow-Headers", "x-requested-with");
+
         try {
             response.setContentType("text/html;charset=UTF-8");
             String action = request.getParameter("action");

@@ -37,6 +37,11 @@ public class Docenti extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException {
 
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+        response.addHeader("Access-Control-Max-Age", "3600");
+        response.addHeader("Access-Control-Allow-Headers", "x-requested-with");
+        
         try {
             response.setContentType("text/html;charset=UTF-8");
             String action = request.getParameter("action");
@@ -50,7 +55,7 @@ public class Docenti extends HttpServlet {
             if (action.equals("getDipList")) {
                 String query = "SELECT DISTINCT cod_dip_aff, afferenza_organizzativa"
                         + " FROM docenti ORDER BY afferenza_organizzativa";
-                
+
                 ResultSet rs = st.executeQuery(query);
                 String temp = "";
                 while (rs.next()) {
@@ -66,7 +71,7 @@ public class Docenti extends HttpServlet {
                 ResultSet rs = st.executeQuery(query);
                 String temp = "";
                 while (rs.next()) {
-                    temp += "<option value='" + rs.getString("ruolo_doc_cod") + "'>"+ rs.getString("ruolo_doc_cod") + "-" + rs.getString("ruolo") + "</option>";
+                    temp += "<option value='" + rs.getString("ruolo_doc_cod") + "'>" + rs.getString("ruolo_doc_cod") + "-" + rs.getString("ruolo") + "</option>";
                 }
                 out.write(temp);
                 rs.close();
@@ -85,8 +90,8 @@ public class Docenti extends HttpServlet {
             }
 
             if (action.equals("getFilteredDoc")) {
-                String dip_cod = (String)request.getParameter("dip_cod");
-                String ruolo_cod = (String)request.getParameter("ruolo_cod");
+                String dip_cod = (String) request.getParameter("dip_cod");
+                String ruolo_cod = (String) request.getParameter("ruolo_cod");
                 String query = "SELECT codice_fiscale, cognome, nome"
                         + " FROM docenti"
                         + " WHERE cod_dip_aff = '" + dip_cod + "' AND ruolo_doc_cod ='" + ruolo_cod + "'"
@@ -99,10 +104,9 @@ public class Docenti extends HttpServlet {
                 out.write(temp);
                 rs.close();
             }
-            
+
             conn.close();
             out.close();
-            
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Docenti.class.getName()).log(Level.SEVERE, null, ex);

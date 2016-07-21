@@ -43,7 +43,7 @@ public class Insegnamenti extends HttpServlet {
             response.setContentType("text/html;charset=UTF-8");
             String action = request.getParameter("action");
             String myDriver = "com.mysql.jdbc.Driver";
-            String myUrl = "jdbc:mysql://ec2-52-18-91-69.eu-west-1.compute.amazonaws.com:3306//maffin";
+            String myUrl = "jdbc:mysql://ec2-52-18-91-69.eu-west-1.compute.amazonaws.com:3306/maffin";
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl, "MaffinRemoteDB", "Bonita.Repo.2016");
             PrintWriter out = response.getWriter();

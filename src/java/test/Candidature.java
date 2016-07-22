@@ -147,7 +147,7 @@ public class Candidature extends HttpServlet {
 
                 Statement st = conn.createStatement();
                 ResultSet rs = st.executeQuery(query);
-                String temp = "";
+                //String temp = "";
                 JSONArray resArray = new JSONArray();
                 JSONObject result;
 
@@ -166,7 +166,8 @@ public class Candidature extends HttpServlet {
                     result.put("ORE_ATT_FRONT", rs.getString("ORE_ATT_FRONT"));
                     resArray.add(result);
                 }
-                out.write(temp);
+                //out.write(temp);
+                out.println(resArray);
                 System.out.println(resArray);
             }
 

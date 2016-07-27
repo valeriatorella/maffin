@@ -12,6 +12,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -52,16 +54,16 @@ public class Candidature extends HttpServlet {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl, "MaffinRemoteDB", "Bonita.Repo.2016");
             PrintWriter out = response.getWriter();
+            Map<String,String> paramList = new HashMap<>();
 
             if (action.equals("insCand")) {
-                String dip_doc = (String) request.getParameter("dip_doc");
-                String cf_doc = (String) request.getParameter("cf_doc");
-                String ruolo_doc = (String) request.getParameter("ruolo_doc");
-                String dip_ins = (String) request.getParameter("dip_cod");
-                String id_ins = (String) request.getParameter("id_ins");
+                paramList.put("dip_doc", (String) request.getParameter("dip_doc"));
+                paramList.put("cf_doc", (String) request.getParameter("cf_doc"));
+                paramList.put("ruolo_doc", (String) request.getParameter("ruolo_doc"));
+                paramList.put("dip_ins", (String) request.getParameter("dip_cod"));
+                paramList.put("id_ins", (String) request.getParameter("id_ins"));
                 
-                String query = "INSERT INTO candidature (ID_INS, COD_FIS, RUOLO_DOC_COD, COD_DIP_AFF, COD_DIP_CAP) VALUES "
-                        + "('" + id_ins + "','" + cf_doc + "','" + ruolo_doc + "'," + dip_doc + "," + dip_ins + ")";
+                String query = createQuery(action, paramList);
 
                 Statement st = conn.createStatement();
                 boolean rs = st.execute(query);
@@ -69,24 +71,12 @@ public class Candidature extends HttpServlet {
 
             //elenco candidature filtrate per dipartimento capofila.
             if (action.equals("getCandByCap")) {
-                String fase = (String) request.getParameter("fase");
-                String dip_cap = (String) request.getParameter("dip_cap");
-                if (!dip_cap.isEmpty()){
-                    String query;
-                    query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.SETT_DOC_COD, "
-                            + "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "
-                            + "offerta_formativa.SETT_COD,offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
-                            + "FROM candidature "
-                            + "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "
-                            + "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "
-                            + "WHERE candidature.STATO = 'ATTESA' "
-                            + "AND candidature.COD_DIP_CAP = " + dip_cap +" ";
-                    switch(fase){
-                        case "A":
-                            query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD')";
-                        case "B":
-                            query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD','RU')";
-                    }
+                  paramList.put("fase",(String) request.getParameter("fase"));
+                  paramList.put("dip_cap",(String) request.getParameter("dip_cap"));
+                  
+                if (!paramList.get("dip_cap").isEmpty()){
+                    
+                    String query = createQuery(action, paramList);
 
                     Statement st = conn.createStatement();
                     ResultSet rs = st.executeQuery(query);
@@ -117,24 +107,17 @@ public class Candidature extends HttpServlet {
                 }
             }
             if (action.equals("convalidaCand")) {
-                String fase = (String) request.getParameter("fase");
-                String dip_cap = (String) request.getParameter("dip_cap");
-                String cand_app = (String) request.getParameter("cand_app").replaceAll("-", ",");
-                if (!cand_app.isEmpty()){
-                    String query;
-                    query = "UPDATE candidature SET STATO = 'APPROVATA' WHERE ID_CAND IN (" + cand_app + ")";
+                paramList.put("fase", (String) request.getParameter("fase"));
+                paramList.put("dip_cap", (String) request.getParameter("dip_cap"));
+                paramList.put("cand_app", (String) request.getParameter("cand_app").replaceAll("-", ","));
+                
+                if (!paramList.get("cand_app").isEmpty()){
+                    String query = createQuery("convalidaCandApprova", paramList);
 
                     Statement st = conn.createStatement();
                     boolean rs = st.execute(query);
 
-                    String query1;
-                    query1 = "UPDATE candidature SET STATO = 'RIFIUTATA' WHERE STATO = 'ATTESA' AND COD_DIP_CAP = " + dip_cap + " ";
-                    switch(fase){
-                        case "A":
-                            query1 += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD')";
-                        case "B":
-                            query1 += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD','RU')";
-                    }
+                    String query1 = createQuery("convalidaCandRifiuta", paramList);;
 
                     Statement st1 = conn.createStatement();
                     boolean rs1 = st1.execute(query1);
@@ -142,18 +125,9 @@ public class Candidature extends HttpServlet {
             }
             //elenco candidature filtrate per dipartimento afferenza.
             if (action.equals("getCandByAff")) {
-                String dip_aff = (String) request.getParameter("dip_aff");
-
-                String query;
-                query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.SETT_DOC_COD, "
-                        + "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "
-                        + "offerta_formativa.SETT_COD,offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
-                        + "FROM candidature "
-                        + "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "
-                        + "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "
-                        + "WHERE candidature.STATO = 'APPROVATA' "
-                        + "AND candidature.COD_DIP_AFF = " + dip_aff +" "
-                        + "AND offerta_formativa.AFFIDATO = 0";
+                paramList.put("dip_aff", (String) request.getParameter("dip_aff"));
+                
+                String query = createQuery(action, paramList);
 
                 Statement st = conn.createStatement();
                 ResultSet rs = st.executeQuery(query);
@@ -183,21 +157,20 @@ public class Candidature extends HttpServlet {
             }
 
             if (action.equals("affidaIns")) {
-                String cand_app = (String) request.getParameter("cand_app").replaceAll("-", ",");
-               //List<String> cand_app_list = Arrays.asList(cand_app.split(","));
-                if (!cand_app.isEmpty()){
-                    String query;
-                    query = "SELECT offerta_formativa.ID_INS, candidature.ID_CAND "
-                            + "FROM offerta_formativa JOIN candidature "
-                            + "ON offerta_formativa.ID_INS = candidature.ID_INS "
-                            + "WHERE candidature.ID_CAND IN(" + cand_app + ")";
+                paramList.put("cand_app", (String) request.getParameter("cand_app").replaceAll("-", ","));
+                
+                if (!paramList.get("cand_app").isEmpty()){
+                    String query = createQuery("affidaInsSelect", paramList);
+                    
                     Statement st = conn.createStatement();
                     ResultSet rs = st.executeQuery(query);
 
                     while (rs.next()) {
-                        String query1;
-                        query1 = "UPDATE offerta_formativa SET ID_CAND = " + rs.getString("ID_CAND") + ","
-                                + "AFFIDATO = 1 WHERE offerta_formativa.ID_INS = " + rs.getString("ID_INS");
+                        paramList.put("ID_CAND",rs.getString("ID_CAND"));
+                        paramList.put("ID_INS", rs.getString("ID_INS"));
+                        
+                        String query1 = createQuery("affidaInsUpdate", paramList);
+                        
                         Statement st1 = conn.createStatement();
                         boolean rs1 = st1.execute(query1);
                     }
@@ -216,6 +189,73 @@ public class Candidature extends HttpServlet {
         }
     }
 
+    public String createQuery(String action, Map<String,String> parameter){
+        String query = "";
+        switch (action){
+            case "insCand":
+                query = "INSERT INTO candidature (ID_INS, COD_FIS, RUOLO_DOC_COD, COD_DIP_AFF, COD_DIP_CAP) VALUES "
+                        + "('" + parameter.get("id_ins") + "','" + parameter.get("cf_doc") + "','" + parameter.get("ruolo_doc") 
+                        + "'," + parameter.get("dip_doc") + "," + parameter.get("dip_ins") + ")";
+                break;
+                
+            case "getCandByCap":
+                    query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.SETT_DOC_COD, "
+                            + "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "
+                            + "offerta_formativa.SETT_COD,offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
+                            + "FROM candidature "
+                            + "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "
+                            + "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "
+                            + "WHERE candidature.STATO = 'ATTESA' "
+                            + "AND candidature.COD_DIP_CAP = " + parameter.get("dip_cap") +" ";
+                    switch(parameter.get("fase")){
+                        case "A":
+                            query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD')";
+                        case "B":
+                            query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD','RU')";
+                    }
+                    break;
+            
+            case "convalidaCandApprova":
+                query = "UPDATE candidature SET STATO = 'APPROVATA' WHERE ID_CAND IN (" + parameter.get("cand_app") + ")";
+                break;
+                
+            case "convalidaCandRifiuta":
+                query = "UPDATE candidature SET STATO = 'RIFIUTATA' WHERE STATO = 'ATTESA' AND COD_DIP_CAP = " + parameter.get("dip_cap") + " ";
+                    switch(parameter.get("fase")){
+                        case "A":
+                            query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD')";
+                        case "B":
+                            query += "AND candidature.RUOLO_DOC_COD IN ('PO','PA','RD','RU')";
+                    }
+                break;
+                
+            case "getCandByAff":
+                query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.SETT_DOC_COD, "
+                        + "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "
+                        + "offerta_formativa.SETT_COD,offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
+                        + "FROM candidature "
+                        + "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "
+                        + "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "
+                        + "WHERE candidature.STATO = 'APPROVATA' "
+                        + "AND candidature.COD_DIP_AFF = " + parameter.get("dip_aff") +" "
+                        + "AND offerta_formativa.AFFIDATO = 0";
+                break;
+                
+            case "affidaInsSelect":
+                query = "SELECT offerta_formativa.ID_INS, candidature.ID_CAND "
+                            + "FROM offerta_formativa JOIN candidature "
+                            + "ON offerta_formativa.ID_INS = candidature.ID_INS "
+                            + "WHERE candidature.ID_CAND IN(" + parameter.get("cand_app") + ")";
+                break;
+                
+            case "affidaInsUpdate":
+                query = "UPDATE offerta_formativa SET ID_CAND = " + parameter.get("ID_CAND") + ","
+                                + "AFFIDATO = 1 WHERE offerta_formativa.ID_INS = " + parameter.get("ID_INS");
+                break;
+                
+        }
+        return query;
+    }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.

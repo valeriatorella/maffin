@@ -176,6 +176,39 @@ public class Candidature extends HttpServlet {
                     }
                 }
             }
+            
+            if (action.equals("convDelibCand")){
+                paramList.put("fase", (String) request.getParameter("fase"));
+                paramList.put("dip_cap", (String) request.getParameter("dip_cap"));
+                paramList.put("cand_app", (String) request.getParameter("cand_app").replaceAll("-", ","));
+                
+                if (!paramList.get("cand_app").isEmpty()){
+                    String query = createQuery("convalidaCandApprova", paramList);
+
+                    Statement st = conn.createStatement();
+                    boolean rs = st.execute(query);
+
+                    String query1 = createQuery("convalidaCandRifiuta", paramList);;
+
+                    Statement st1 = conn.createStatement();
+                    boolean rs1 = st1.execute(query1);
+                    
+                    String query2 = createQuery("affidaInsSelect", paramList);
+                    
+                    Statement st2 = conn.createStatement();
+                    ResultSet rs2 = st2.executeQuery(query2);
+
+                    while (rs2.next()) {
+                        paramList.put("ID_CAND",rs2.getString("ID_CAND"));
+                        paramList.put("ID_INS", rs2.getString("ID_INS"));
+                        
+                        String query3 = createQuery("affidaInsUpdate", paramList);
+                        
+                        Statement st3 = conn.createStatement();
+                        boolean rs3 = st3.execute(query3);
+                    }
+                }
+            }
 
             conn.close();
             out.close();

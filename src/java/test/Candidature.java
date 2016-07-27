@@ -73,9 +73,9 @@ public class Candidature extends HttpServlet {
                 String dip_cap = (String) request.getParameter("dip_cap");
                 if (!dip_cap.isEmpty()){
                     String query;
-                    query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, "
+                    query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.SETT_DOC_COD, "
                             + "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "
-                            + "offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
+                            + "offerta_formativa.SETT_COD,offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
                             + "FROM candidature "
                             + "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "
                             + "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "
@@ -101,10 +101,11 @@ public class Candidature extends HttpServlet {
                         result.put("RUOLO_DOC_COD", rs.getString("RUOLO_DOC_COD"));
                         result.put("NOME", rs.getString("NOME"));
                         result.put("COGNOME", rs.getString("COGNOME"));
-                        result.put("AREA_SETT_SSD", rs.getString("AREA_SETT_SSD"));
+                        result.put("SETT_DOC_COD", rs.getString("SETT_DOC_COD"));
                         result.put("PDS_DES", rs.getString("PDS_DES"));
                         result.put("NOME_CDS", rs.getString("NOME_CDS"));
                         result.put("TIPO_CORSO_COD", rs.getString("TIPO_CORSO_COD"));
+                        result.put("SETT_COD", rs.getString("SETT_COD"));
                         result.put("AF_GEN_COD", rs.getString("AF_GEN_COD"));
                         result.put("DES", rs.getString("DES"));
                         result.put("ORE_ATT_FRONT", rs.getString("ORE_ATT_FRONT"));
@@ -144,9 +145,9 @@ public class Candidature extends HttpServlet {
                 String dip_aff = (String) request.getParameter("dip_aff");
 
                 String query;
-                query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.AREA_SETT_SSD, "
+                query = "SELECT candidature.ID_CAND, docenti.RUOLO_DOC_COD,docenti.NOME,docenti.COGNOME,docenti.SETT_DOC_COD, "
                         + "offerta_formativa.PDS_DES,offerta_formativa.NOME_CDS,offerta_formativa.TIPO_CORSO_COD, "
-                        + "offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
+                        + "offerta_formativa.SETT_COD,offerta_formativa.AF_GEN_COD,offerta_formativa.DES, offerta_formativa.ORE_ATT_FRONT "
                         + "FROM candidature "
                         + "JOIN offerta_formativa ON offerta_formativa.ID_INS = candidature.ID_INS "
                         + "JOIN docenti ON candidature.COD_FIS = docenti.CODICE_FISCALE "
@@ -166,10 +167,11 @@ public class Candidature extends HttpServlet {
                     result.put("RUOLO_DOC_COD", rs.getString("RUOLO_DOC_COD"));
                     result.put("NOME", rs.getString("NOME"));
                     result.put("COGNOME", rs.getString("COGNOME"));
-                    result.put("AREA_SETT_SSD", rs.getString("AREA_SETT_SSD"));
+                    result.put("SETT_DOC_COD", rs.getString("SETT_DOC_COD"));
                     result.put("PDS_DES", rs.getString("PDS_DES"));
                     result.put("NOME_CDS", rs.getString("NOME_CDS"));
                     result.put("TIPO_CORSO_COD", rs.getString("TIPO_CORSO_COD"));
+                    result.put("SETT_COD", rs.getString("SETT_COD"));
                     result.put("AF_GEN_COD", rs.getString("AF_GEN_COD"));
                     result.put("DES", rs.getString("DES"));
                     result.put("ORE_ATT_FRONT", rs.getString("ORE_ATT_FRONT"));
